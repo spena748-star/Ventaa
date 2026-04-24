@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Ventas Fácil - Modo accesible</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: #eef2f5;
+            padding: 20px;
+            font-size: 18px;
+        }
+        .container {
+            max-width: 1300px;
+            margin: 0 auto;
+        }
+        /* Tarjetas grandes */
+        .card {
+            background: white;
+            border-radius: 32px;
+            padding: 24px;
+            margin-bottom: 28px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+            border: 1px solid #dee2e6;
+        }
+        .card-title {
+            font-size: 28px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #1e466e;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        /* Botones enormes */
+        .btn {
+            border: none;
+            border-radius: 60px;
+            padding: 14px 28px;
+            font-size: 20px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            background: #e9ecef;
+            color: #1e2a3e;
+        }
+        .btn-primary {
+            background: #2c7da0;
+            color: white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .btn-primary:active { background: #1f5e7a; transform: scale(0.97);}
+        .btn-success {
+            background: #2e7d64;
+            color: white;
+        }
+        .btn-warning {
+            background: #e6a017;
+            color: white;
+        }
+        .btn-danger {
+            background: #bc4742;
+            color: white;
+        }
+        .btn-micro {
+            background: #5e60ce;
+            color: white;
+            font-size: 24px;
+            padding: 12px 24px;
+        }
+        /* Formulario simplificado */
+        .form-simple {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .field {
+            flex: 1;
+            min-width: 180px;
+        }
+        .field label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 16px;
+            color: #2c3e50;
+        }
+        .field input, .field select {
+            width: 100%;
+            padding: 15px;
+            font-size: 18px;
+            border: 2px solid #ced4da;
+            border-radius: 28px;
+            background: white;
+        }
+        /* Tabla cobranza */
+        .table-wrapper {
+            overflow-x: auto;
+            border-radius: 24px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 16px;
+        }
+        th {
+            background: #f1f3f5;
+            padding: 14px 12px;
+            text-align: left;
+            font-weight: 600;
+        }
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #e9ecef;
+        }
+        .cliente-total {
+            font-weight: 700;
+            color: #1e466e;
+        }
+        .saldo-pendiente {
+            font-weight: 700;
+            color: #bc4742;
+        }
+        .micro-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: #f8f9fa;
+            padding: 6px 14px;
+            border-radius: 40px;
+            font-size: 14px;
+        }
+        .listening {
+            background-color: #e63946;
+            animation: pulse 1s infinite;
+        }
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.6; }
+            100% { opacity: 1; }
+        }
+        @media (max-width: 700px) {
+            body { padding: 12px; }
+            .btn { padding: 12px 20px; font-size: 18px; }
+            .field input, .field select { padding: 12px; font-size: 16px; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <!-- Encabezado simple -->
+    <div class="card" style="background: #2c7da0; color: white;">
+        <h1 style="font-size: 32px;">🛍️ Ventas Fácil</h1>
+        <p>Sistema accesible - Usa el micrófono o toca los botones</p>
+    </div>
+
+    <!-- Captura de venta (simplificada) -->
+    <div class="card">
+        <div class="card-title">
+            📝 Nueva venta
+            <button id="btnMicrofono" class="btn btn-micro">🎤 Micrófono</button>
+            <span id="voiceStatus" class="micro-status">⚪ Apagado</span>
+        </div>
+        <div class="form-simple">
+            <div class="field">
+                <label>📱 Cliente (4 dígitos)</label>
+                <input type="text" id="cliente" maxlength="4" placeholder="Ej: 1234" autocomplete="off">
+            </div>
+            <div class="field">
+                <label>📦 Producto</label>
+                <input type="text" id="producto" placeholder="Ej: Sandalias" autocomplete="off">
+            </div>
+            <div class="field">
+                <label>💵 Precio USD</label>
+                <input type="number" id="precioUSD" step="0.01" placeholder="0.00">
+            </div>
+            <div class="field">
+                <label>🔢 Piezas</label>
+                <input type="number" id="pzas" value="1" min="1">
+            </div>
+        </div>
+        <div style="background: #eef2fb; border-radius: 28px; padding: 15px; margin: 15px 0; text-align: center;">
+            <span style="font-size: 20px;">💰 Total a pagar (MXN):</span>
+            <span id="previewTotal" style="font-size: 36px; font-weight: bold; display: block;">$0.00</span>
+        </div>
+        <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+            <button id="btnAgregarVenta" class="btn btn-primary" style="flex:2;">➕ Agregar venta</button>
+            <button id="btnLimpiarForm" class="btn" style="flex:1;">🗑️ Limpiar</button>
+        </div>
+    </div>
+
+    <!-- Cobranza por cliente (similar a hoja Excel) -->
+    <div class="card">
+        <div class="card-title">
+            📋 Cobranza por cliente
+            <button id="btnExportar" class="btn" style="background:#dee2e6;">📥 Exportar Excel</button>
+            <button id="btnImportar" class="btn" style="background:#dee2e6;">📂 Importar Excel</button>
+            <input type="file" id="fileImport" accept=".xlsx, .xls, .csv" style="display: none;">
+        </div>
+        <div class="table-wrapper">
+            <table id="tablaCobranza">
+                <thead>
+                    <tr>
+                        <th>Cliente</th>
+                        <th>Piezas</th>
+                        <th>Total MXN</th>
+                        <th>Depósitos</th>
+                        <th>Saldo pendiente</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="tbodyCobranza"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Depósitos independientes rápidos -->
+    <div class="card">
+        <div class="card-title">💰 Registrar depósito (sin venta)</div>
+        <div class="form-simple">
+            <div class="field">
+                <label>Cliente (4 dígitos)</label>
+                <input type="text" id="depCliente" maxlength="4" placeholder="Ej: 1234">
+            </div>
+            <div class="field">
+                <label>Monto MXN</label>
+                <input type="number" id="depMonto" step="0.01" placeholder="0.00">
+            </div>
+            <div class="field">
+                <label>Banco</label>
+                <select id="depBanco">
+                    <option>EFECTIVO</option>
+                    <option>BANORTE</option>
+                    <option>HSBC</option>
+                </select>
+            </div>
+        </div>
+        <button id="btnRegistrarDeposito" class="btn btn-success">✅ Registrar depósito</button>
+    </div>
+</div>
+
+<script>
+    // ---------- DATOS ----------
+    let ventas = [];      // cada venta: { id, fecha, cliente, producto, pzas, precioUSD, totalMXN, deposito, saldo }
+    let depositosIndep = []; // { id, fecha, cliente, monto, banco }
+    let nextId = 1;
+    let nextDepId = 1;
+
+    // Configuración fija (puedes ajustar)
+    const TC = 17.40;        // tipo de cambio fijo (puedes hacer editable si quieres)
+    const COMISION = 10;     // 10%
+    let happyHourActiva = false;
+    let descuentoHH = 0;
+
+    // Para sincronización entre pestañas (opcional, pero útil)
+    function iniciarSincronizacion() {
+        window.addEventListener('storage', (e) => {
+            if (e.key === 'ventas_sistema') { cargarVentas(); actualizarTodo(); }
+            if (e.key === 'depositos_sistema') { cargarDepositos(); actualizarTodo(); }
+        });
+    }
+
+    function guardarTodo() {
+        localStorage.setItem("ventas_sistema", JSON.stringify(ventas));
+        localStorage.setItem("depositos_sistema", JSON.stringify(depositosIndep));
+    }
+
+    function cargarVentas() {
+        let v = localStorage.getItem("ventas_sistema");
+        if (v) ventas = JSON.parse(v);
+        else ventas = [];
+        if (ventas.length) nextId = Math.max(...ventas.map(v=>v.id)) + 1;
+        else nextId = 1;
+    }
+    function cargarDepositos() {
+        let d = localStorage.getItem("depositos_sistema");
+        if (d) depositosIndep = JSON.parse(d);
+        else depositosIndep = [];
+        if (depositosIndep.length) nextDepId = Math.max(...depositosIndep.map(d=>d.id)) + 1;
+        else nextDepId = 1;
+    }
+    function cargarDatos() {
+        cargarVentas();
+        cargarDepositos();
+    }
+
+    // Calcular total MXN desde precioUSD y piezas
+    function calcularTotalVenta(precioUSD, pzas) {
+        let subtotalUSD = precioUSD * pzas;
+        let mxnBase = subtotalUSD * TC;
+        let comision = mxnBase * (COMISION/100);
+        let total = mxnBase + comision;
+        if (happyHourActiva) total = total * (1 - descuentoHH/100);
+        return total;
+    }
+
+    // Mostrar previsualización
+    function actualizarPreview() {
+        let precio = parseFloat(document.getElementById("precioUSD").value) || 0;
+        let pzas = parseInt(document.getElementById("pzas").value) || 1;
+        let total = calcularTotalVenta(precio, pzas);
+        document.getElementById("previewTotal").innerHTML = `$${total.toFixed(2)}`;
+    }
+
+    // Agregar venta
+    function agregarVenta() {
+        let cliente = document.getElementById("cliente").value.trim();
+        let producto = document.getElementById("producto").value.trim();
+        let precioUSD = parseFloat(document.getElementById("precioUSD").value) || 0;
+        let pzas = parseInt(document.getElementById("pzas").value) || 1;
+        if (!cliente || !producto || precioUSD <= 0) {
+            alert("Por favor, completa cliente, producto y precio USD");
+            return;
+        }
+        let totalMXN = calcularTotalVenta(precioUSD, pzas);
+        let deposito = 0; // inicialmente sin depósito (se puede registrar después)
+        let saldo = totalMXN - deposito;
+        let venta = {
+            id: nextId++,
+            fecha: new Date().toISOString().slice(0,10),
+            cliente,
+            producto,
+            pzas,
+            precioUSD,
+            totalMXN,
+            deposito,
+            saldo
+        };
+        ventas.push(venta);
+        guardarTodo();
+        // Limpiar campos (opcional)
+        document.getElementById("cliente").value = "";
+        document.getElementById("producto").value = "";
+        document.getElementById("precioUSD").value = "";
+        document.getElementById("pzas").value = "1";
+        actualizarPreview();
+        actualizarCobranza();
+        alert("Venta agregada correctamente");
+    }
+
+    // Registrar depósito (puede ser a una venta específica o depósito independiente)
+    // Para simplificar: los depósitos independientes se suman al saldo del cliente (como un abono general)
+    // También se puede abonar directamente a una venta (opcional), pero para parecerse al Excel, mejor depósito independiente que afecta al cliente.
+    function registrarDepositoIndependiente() {
+        let cliente = document.getElementById("depCliente").value.trim();
+        let monto = parseFloat(document.getElementById("depMonto").value) || 0;
+        let banco = document.getElementById("depBanco").value;
+        if (!cliente || monto <= 0) {
+            alert("Ingrese cliente y monto válido");
+            return;
+        }
+        // Guardar depósito independiente
+        depositosIndep.push({
+            id: nextDepId++,
+            fecha: new Date().toISOString().slice(0,10),
+            cliente,
+            monto,
+            banco
+        });
+        // También podemos aplicarlo directamente a la deuda del cliente (actualizar depósitos en ventas)
+        // Aquí lo haremos de forma simple: al calcular cobranza, sumamos depósitos independientes y depósitos de ventas.
+        guardarTodo();
+        document.getElementById("depCliente").value = "";
+        document.getElementById("depMonto").value = "";
+        actualizarCobranza();
+        alert("Depósito registrado");
+    }
+
+    // Para aplicar un depósito a un cliente específico desde la tabla de cobranza
+    function abonarACliente(cliente) {
+        let monto = prompt(`¿Cuánto desea abonar al cliente ${cliente}?`, "0");
+        if (monto === null) return;
+        monto = parseFloat(monto);
+        if (isNaN(monto) || monto <= 0) return;
+        // Registrar depósito independiente
+        depositosIndep.push({
+            id: nextDepId++,
+            fecha: new Date().toISOString().slice(0,10),
+            cliente,
+            monto,
+            banco: "EFECTIVO"
+        });
+        guardarTodo();
+        actualizarCobranza();
+        alert(`Abono de $${monto.toFixed(2)} registrado para ${cliente}`);
+    }
+
+    // Calcular cobranza por cliente (similar a hoja Excel)
+    function obtenerCobranza() {
+        let resumen = new Map(); // cliente -> { totalMXN, depositosTotales, piezas }
+        // Sumar ventas
+        ventas.forEach(v => {
+            if (!resumen.has(v.cliente)) {
+                resumen.set(v.cliente, { totalVentas: 0, depositos: 0, piezas: 0 });
+            }
+            let data = resumen.get(v.cliente);
+            data.totalVentas += v.totalMXN;
+            data.piezas += v.pzas;
+            data.depositos += v.deposito; // depósito directo de la venta
+        });
+        // Sumar depósitos independientes
+        depositosIndep.forEach(d => {
+            if (!resumen.has(d.cliente)) {
+                resumen.set(d.cliente, { totalVentas: 0, depositos: 0, piezas: 0 });
+            }
+            resumen.get(d.cliente).depositos += d.monto;
+        });
+        // Calcular saldo pendiente
+        let resultado = [];
+        for (let [cliente, data] of resumen.entries()) {
+            let saldo = data.totalVentas - data.depositos;
+            resultado.push({
+                cliente,
+                piezas: data.piezas,
+                totalVentas: data.totalVentas,
+                depositos: data.depositos,
+                saldo: saldo
+            });
+        }
+        // Ordenar por cliente
+        resultado.sort((a,b) => a.cliente.localeCompare(b.cliente));
+        return resultado;
+    }
+
+    function actualizarCobranza() {
+        let cobranza = obtenerCobranza();
+        let tbody = document.getElementById("tbodyCobranza");
+        tbody.innerHTML = "";
+        for (let item of cobranza) {
+            let row = tbody.insertRow();
+            row.insertCell(0).innerHTML = `<strong>${item.cliente}</strong>`;
+            row.insertCell(1).innerText = item.piezas;
+            row.insertCell(2).innerText = `$${item.totalVentas.toFixed(2)}`;
+            row.insertCell(3).innerText = `$${item.depositos.toFixed(2)}`;
+            let saldoClass = item.saldo > 0 ? "saldo-pendiente" : "";
+            row.insertCell(4).innerHTML = `<span class="${saldoClass}">$${item.saldo.toFixed(2)}</span>`;
+            let btnAbonar = document.createElement("button");
+            btnAbonar.innerText = "💵 Abonar";
+            btnAbonar.className = "btn";
+            btnAbonar.style.padding = "8px 16px";
+            btnAbonar.style.fontSize = "14px";
+            btnAbonar.onclick = () => abonarACliente(item.cliente);
+            row.insertCell(5).appendChild(btnAbonar);
+        }
+        if (cobranza.length === 0) {
+            let row = tbody.insertRow();
+            row.insertCell(0).colSpan = 6;
+            row.insertCell(0).innerText = "No hay clientes aún. Agrega ventas o depósitos.";
+        }
+    }
+
+    // Exportar a Excel (simple)
+    async function exportarExcel() {
+        if (typeof XLSX === 'undefined') await import('https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js');
+        let wb = XLSX.utils.book_new();
+        // Hoja de ventas
+        let ventasSheet = XLSX.utils.json_to_sheet(ventas.map(v => ({
+            Fecha: v.fecha,
+            Cliente: v.cliente,
+            Producto: v.producto,
+            Piezas: v.pzas,
+            PrecioUSD: v.precioUSD,
+            TotalMXN: v.totalMXN,
+            Deposito: v.deposito,
+            Saldo: v.saldo
+        })));
+        XLSX.utils.book_append_sheet(wb, ventasSheet, "Ventas");
+        // Hoja de cobranza
+        let cobranza = obtenerCobranza();
+        let cobranzaSheet = XLSX.utils.json_to_sheet(cobranza.map(c => ({
+            Cliente: c.cliente,
+            Piezas: c.piezas,
+            TotalMXN: c.totalVentas,
+            Depositos: c.depositos,
+            SaldoPendiente: c.saldo
+        })));
+        XLSX.utils.book_append_sheet(wb, cobranzaSheet, "Cobranza");
+        // Depósitos independientes
+        let deposSheet = XLSX.utils.json_to_sheet(depositosIndep.map(d => ({
+            Fecha: d.fecha,
+            Cliente: d.cliente,
+            Monto: d.monto,
+            Banco: d.banco
+        })));
+        XLSX.utils.book_append_sheet(wb, deposSheet, "Depositos");
+        XLSX.writeFile(wb, `ventas_cobranza_${new Date().toISOString().slice(0,10)}.xlsx`);
+    }
+
+    // Importar desde Excel (clientes, ventas, depósitos? Se puede hacer más complejo, pero por ahora solo ventas)
+    // Para simplificar, importaremos ventas desde un archivo con columnas similares a la hoja "DATA"
+    async function importarExcel(file) {
+        if (typeof XLSX === 'undefined') await import('https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js');
+        const data = await file.arrayBuffer();
+        const workbook = XLSX.read(data);
+        const sheet = workbook.Sheets[workbook.SheetNames[0]];
+        const rows = XLSX.utils.sheet_to_json(sheet);
+        if (!rows || rows.length === 0) { alert("No se encontraron datos"); return; }
+        let importadas = 0;
+        for (let row of rows) {
+            let cliente = row.Cliente || row.cliente || "";
+            let producto = row.Producto || row.producto || "";
+            let precioUSD = parseFloat(row["Precio U."] || row.precioUSD || row["Precio USD"] || 0);
+            let pzas = parseInt(row.PZAS || row.pzas || 1);
+            if (cliente && producto && precioUSD > 0) {
+                let totalMXN = calcularTotalVenta(precioUSD, pzas);
+                let deposito = parseFloat(row.Dep || row.deposito || 0);
+                let saldo = totalMXN - deposito;
+                ventas.push({
+                    id: nextId++,
+                    fecha: row.Fecha || new Date().toISOString().slice(0,10),
+                    cliente,
+                    producto,
+                    pzas,
+                    precioUSD,
+                    totalMXN,
+                    deposito,
+                    saldo
+                });
+                importadas++;
+            }
+        }
+        if (importadas > 0) {
+            guardarTodo();
+            actualizarCobranza();
+            alert(`Se importaron ${importadas} ventas.`);
+        } else {
+            alert("No se encontraron ventas válidas en el archivo. Asegúrate de tener columnas: Cliente, Producto, Precio U., PZAS");
+        }
+    }
+
+    // ---------- VOZ ----------
+    let recognition = null;
+    let listening = false;
+    function iniciarVoz() {
+        if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+            alert("Tu navegador no soporta reconocimiento de voz. Usa Chrome.");
+            return;
+        }
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        recognition = new SpeechRecognition();
+        recognition.continuous = true;
+        recognition.interimResults = false;
+        recognition.lang = 'es-ES';
+        recognition.onstart = () => {
+            listening = true;
+            document.getElementById("btnMicrofono").innerHTML = "🎤 Apagar micrófono";
+            document.getElementById("btnMicrofono").classList.add("listening");
+            document.getElementById("voiceStatus").innerHTML = "🎙️ Escuchando...";
+        };
+        recognition.onerror = (e) => {
+            console.error(e);
+            detenerVoz();
+        };
+        recognition.onend = () => {
+            if (listening) recognition.start();
+            else {
+                document.getElementById("btnMicrofono").innerHTML = "🎤 Micrófono";
+                document.getElementById("btnMicrofono").classList.remove("listening");
+                document.getElementById("voiceStatus").innerHTML = "⚪ Apagado";
+            }
+        };
+        recognition.onresult = (event) => {
+            const last = event.results.length - 1;
+            const texto = event.results[last][0].transcript.trim().toLowerCase();
+            console.log("Comando:", texto);
+            procesarComando(texto);
+        };
+        recognition.start();
+    }
+    function detenerVoz() {
+        if (recognition) {
+            listening = false;
+            recognition.stop();
+            recognition = null;
+        }
+    }
+    function toggleVoz() {
+        if (listening) detenerVoz();
+        else iniciarVoz();
+    }
+    function procesarComando(texto) {
+        // Comandos: precio 50, cliente 1234, producto tenis, piezas 3, agregar venta, limpiar
+        let match = texto.match(/precio\s+(\d+(?:\.\d+)?)/);
+        if (match) {
+            document.getElementById("precioUSD").value = match[1];
+            actualizarPreview();
+            return;
+        }
+        match = texto.match(/cliente\s+(\d{4})/);
+        if (match) {
+            document.getElementById("cliente").value = match[1];
+            return;
+        }
+        match = texto.match(/producto\s+(.+)/);
+        if (match) {
+            document.getElementById("producto").value = match[1];
+            return;
+        }
+        match = texto.match(/piezas?\s+(\d+)/);
+        if (match) {
+            document.getElementById("pzas").value = parseInt(match[1]);
+            actualizarPreview();
+            return;
+        }
+        if (texto.includes("agregar venta") || texto.includes("guardar venta")) {
+            document.getElementById("btnAgregarVenta").click();
+            return;
+        }
+        if (texto.includes("limpiar")) {
+            document.getElementById("btnLimpiarForm").click();
+            return;
+        }
+        // Mostrar comando no reconocido en el estado
+        document.getElementById("voiceStatus").innerHTML = `🎙️ "${texto}" (no reconocido)`;
+        setTimeout(() => {
+            if (listening) document.getElementById("voiceStatus").innerHTML = "🎙️ Escuchando...";
+        }, 1500);
+    }
+
+    // Inicializar eventos
+    document.getElementById("btnAgregarVenta").onclick = agregarVenta;
+    document.getElementById("btnRegistrarDeposito").onclick = registrarDepositoIndependiente;
+    document.getElementById("btnExportar").onclick = exportarExcel;
+    document.getElementById("btnImportar").onclick = () => document.getElementById("fileImport").click();
+    document.getElementById("fileImport").onchange = async (e) => {
+        if (e.target.files.length) await importarExcel(e.target.files[0]);
+        e.target.value = "";
+    };
+    document.getElementById("btnLimpiarForm").onclick = () => {
+        document.getElementById("cliente").value = "";
+        document.getElementById("producto").value = "";
+        document.getElementById("precioUSD").value = "";
+        document.getElementById("pzas").value = "1";
+        actualizarPreview();
+    };
+    document.getElementById("btnMicrofono").onclick = toggleVoz;
+    document.getElementById("precioUSD").addEventListener("input", actualizarPreview);
+    document.getElementById("pzas").addEventListener("input", actualizarPreview);
+    
+    // Cargar datos iniciales
+    cargarDatos();
+    actualizarCobranza();
+    actualizarPreview();
+    iniciarSincronizacion();
+</script>
+</body>
+</html>
